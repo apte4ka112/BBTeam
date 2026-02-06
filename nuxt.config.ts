@@ -15,6 +15,9 @@ export default defineNuxtConfig({
     gigaChatClientId: process.env.GIGACHAT_CLIENT_ID || '',
     gigaChatClientSecret: process.env.GIGACHAT_CLIENT_SECRET || '',
     gigaChatModel: process.env.GIGACHAT_MODEL || 'GigaChat-2',
+    public: {
+      yandexMetrikaId: process.env.NUXT_PUBLIC_YANDEX_METRIKA_ID || '',
+    },
   },
 
   typescript: {
