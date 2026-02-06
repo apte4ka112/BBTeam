@@ -1,14 +1,29 @@
 {
-  "name": "BBTeam",
+  "name": "bbteam-telegram-auth",
   "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
+  "description": "Nuxt 3 Telegram Login Widget Auth",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "build": "tsc"
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@vueuse/nuxt": "^12.0.0",
+    "crypto-js": "^4.2.0",
+    "nuxt": "^3.15.0",
+    "vue": "^3.5.0"
+  },
   "devDependencies": {
-    "typescript": "^5.5.3"
-  },
-  "private": true
+    "@nuxt/types": "^2.18.1",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.5.3",
+    "vue-tsc": "^2.1.0"
+  }
 }
