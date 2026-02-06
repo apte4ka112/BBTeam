@@ -13,6 +13,16 @@
         </NuxtLink>
 
         <div class="flex items-center gap-3">
+          <NuxtLink
+            to="/news"
+            class="px-3 py-2 text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all text-sm flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+            </svg>
+            <span class="hidden sm:inline">Новости</span>
+          </NuxtLink>
+
           <div class="flex items-center gap-3 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
             <div class="w-2 h-2 bg-green-400 rounded-full"></div>
             <span class="text-white font-medium text-sm">{{ formattedAddress }}</span>
@@ -40,7 +50,7 @@
     </div>
 
     <!-- Main dashboard grid -->
-    <div v-else class="flex-1 grid grid-cols-1 lg:grid-cols-[260px_1fr_360px] gap-0 min-h-0 overflow-auto lg:overflow-hidden">
+    <div v-else class="flex-1 grid grid-cols-1 lg:grid-cols-[260px_1fr_400px] gap-0 min-h-0 overflow-auto lg:overflow-hidden">
 
       <!-- LEFT: Token list -->
       <div class="border-r border-white/10 flex flex-col min-h-0">
@@ -94,7 +104,7 @@
         <!-- Chart -->
         <div class="h-[55%] p-4 pb-2 min-h-0">
           <ClientOnly>
-            <CryptoChart v-if="selectedToken" :symbol="selectedToken" />
+            <MarketChart v-if="selectedToken" :symbol="selectedToken" />
             <template #fallback>
               <div class="bg-white/5 border border-white/10 rounded-2xl h-full flex items-center justify-center">
                 <span class="text-white/30 text-sm">Загрузка графика...</span>
@@ -111,6 +121,7 @@
               :address="address"
               :wallet-type="type || 'EVM'"
               :chain="moralisChain"
+              :token-symbol="selectedToken"
             />
             <template #fallback>
               <div class="bg-white/5 border border-white/10 rounded-2xl h-full flex items-center justify-center">
@@ -121,37 +132,39 @@
         </div>
       </div>
 
-      <!-- RIGHT: AI Chat (55%) + News (45%) -->
-      <div class="flex flex-col min-h-0">
-        <!-- AI Chat -->
-        <div class="h-[55%] p-4 pb-2 min-h-0">
-          <ClientOnly>
-            <AiChat :tokens="portfolioTokens" :total-usd="totalUsdValue" />
-            <template #fallback>
-              <div class="bg-white/5 border border-white/10 rounded-2xl h-full flex items-center justify-center">
-                <span class="text-white/30 text-sm">Загрузка чата...</span>
-              </div>
-            </template>
-          </ClientOnly>
-        </div>
-
-        <!-- News -->
-        <div class="h-[45%] p-4 pt-2 min-h-0">
-          <ClientOnly>
-            <NewsBlock />
-            <template #fallback>
-              <div class="bg-white/5 border border-white/10 rounded-2xl h-full flex items-center justify-center">
-                <span class="text-white/30 text-sm">Загрузка новостей...</span>
-              </div>
-            </template>
-          </ClientOnly>
-        </div>
+      <!-- RIGHT: AI Chat (100% height) -->
+      <div class="flex flex-col min-h-0 p-4">
+        <ClientOnly>
+          <AiChat
+            :tokens="portfolioTokens"
+            :total-usd="totalUsdValue"
+            :address="address"
+            :wallet-type="type"
+            :moralis-chain="moralisChain"
+          />
+          <template #fallback>
+            <div class="bg-white/5 border border-white/10 rounded-2xl h-full flex items-center justify-center">
+              <span class="text-white/30 text-sm">Загрузка чата...</span>
+            </div>
+          </template>
+        </ClientOnly>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+// SEO metadata
+useHead({
+  title: 'Портфель - BBTeam',
+  meta: [
+    { name: 'description', content: 'Отслеживайте свой криптопортфель в реальном времени. Графики, транзакции, AI-аналитика и новости.' },
+    { property: 'og:title', content: 'Портфель - BBTeam' },
+    { property: 'og:description', content: 'Отслеживайте свой криптопортфель в реальном времени' },
+    { name: 'robots', content: 'noindex, nofollow' }, // Private dashboard
+  ]
+})
+
 const {
   isConnected, address, type, moralisChain,
   portfolioTokens, totalUsdValue, portfolioLoading,

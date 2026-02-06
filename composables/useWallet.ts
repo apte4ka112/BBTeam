@@ -129,7 +129,26 @@ export const useWallet = () => {
   }
 
   const setManualAddress = (address: string, type: 'BTC' | 'TON') => {
-    state.value.address = address
+    // Validate address format before saving
+    const trimmedAddress = address.trim()
+
+    if (type === 'TON') {
+      // TON address validation: UQ:..., EQ:..., 0:..., or raw base64
+      const isValidTON = /^(UQ|EQ|0:[a-zA-Z0-9\/+_=-]+|[a-zA-Z0-9\/+_]{48})$/.test(trimmedAddress)
+      if (!isValidTON) {
+        state.value.error = 'Неверный формат TON адреса. Ожидается: UQ:..., EQ:..., 0:... или base64'
+        return
+      }
+    } else if (type === 'BTC') {
+      // BTC address validation
+      const isValidBTC = /^(1|3|bc1)[a-zA-HJ-NP-Z0-9]{25,62}$/.test(trimmedAddress)
+      if (!isValidBTC) {
+        state.value.error = 'Неверный формат Bitcoin адреса. Ожидается: 1..., 3... или bc1...'
+        return
+      }
+    }
+
+    state.value.address = trimmedAddress
     state.value.type = type
     state.value.evmChainId = null
     state.value.error = null

@@ -148,6 +148,15 @@ async function fetchBTCTransactions(address: string): Promise<TransactionsRespon
 // ─── TON (TonAPI) ────────────────────────────────────────────────
 
 async function fetchTONTransactions(address: string): Promise<TransactionsResponse> {
+  // Validate TON address format (user-friendly: UQ:..., EQ:..., 0:..., or raw base64)
+  const isValidTON = /^(UQ|EQ|0:[a-zA-Z0-9\/+_=-]+|[a-zA-Z0-9\/+_]{48}$)/.test(address.trim())
+  if (!isValidTON) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid TON address format. Expected format: UQ:..., EQ:..., 0:..., or raw base64'
+    })
+  }
+
   try {
     const data = await $fetch<any>(`https://tonapi.io/v2/accounts/${address}/events`, {
       query: { limit: 20 },

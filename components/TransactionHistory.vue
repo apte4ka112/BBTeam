@@ -24,14 +24,16 @@
     </div>
 
     <!-- Empty -->
-    <div v-else-if="!transactions.length" class="flex-1 flex items-center justify-center">
-      <span class="text-white/30 text-sm">Транзакции не найдены</span>
+    <div v-else-if="!filteredTransactions.length" class="flex-1 flex items-center justify-center">
+      <span class="text-white/30 text-sm">
+        {{ transactions.length ? `Нет транзакций для ${props.tokenSymbol || 'выбранного токена'}` : 'Транзакции не найдены' }}
+      </span>
     </div>
 
     <!-- Transactions list -->
     <div v-else class="flex-1 overflow-y-auto p-3 space-y-1">
       <a
-        v-for="tx in transactions"
+        v-for="tx in filteredTransactions"
         :key="tx.hash"
         :href="tx.explorerUrl"
         target="_blank"
@@ -84,6 +86,7 @@ const props = defineProps<{
   address: string
   walletType: string
   chain?: string
+  tokenSymbol?: string  // Selected token to filter by
 }>()
 
 interface Transaction {
@@ -100,6 +103,21 @@ interface Transaction {
 const transactions = ref<Transaction[]>([])
 const loading = ref(false)
 const errorMsg = ref('')
+
+// Filter transactions by selected token symbol
+const filteredTransactions = computed(() => {
+  if (!props.tokenSymbol) {
+    return transactions.value
+  }
+
+  const symbol = props.tokenSymbol.toUpperCase()
+  return transactions.value.filter(tx => {
+    // Extract symbol from value string (e.g., "0.1234 ETH" -> "ETH")
+    const parts = tx.value.split(' ')
+    const txSymbol = parts[parts.length - 1]?.toUpperCase()
+    return txSymbol === symbol
+  })
+})
 
 const shortAddr = (addr: string) => {
   if (!addr || addr.length < 10) return addr || '—'

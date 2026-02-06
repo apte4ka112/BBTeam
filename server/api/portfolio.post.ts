@@ -94,7 +94,7 @@ async function fetchBTC(address: string): Promise<PortfolioResponse> {
     const balanceSats = funded - spent
     const balanceBTC = balanceSats / 1e8
 
-    const btcPrice = await getCoinPrice('bitcoin')
+    const btcPrice = await getCachedSpotPrice('bitcoin')
     const usdValue = Math.round(balanceBTC * btcPrice * 100) / 100
 
     return {
@@ -119,11 +119,20 @@ async function fetchBTC(address: string): Promise<PortfolioResponse> {
 // ─── TON (TonAPI) ────────────────────────────────────────────────
 
 async function fetchTON(address: string): Promise<PortfolioResponse> {
+  // Validate TON address format (user-friendly: UQ:..., EQ:..., 0:..., or raw base64)
+  const isValidTON = /^(UQ|EQ|0:[a-zA-Z0-9\/+_=-]+|[a-zA-Z0-9\/+_]{48}$)/.test(address.trim())
+  if (!isValidTON) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Invalid TON address format. Expected format: UQ:..., EQ:..., 0:..., or raw base64'
+    })
+  }
+
   try {
     const account = await $fetch<any>(`https://tonapi.io/v2/accounts/${address}`)
 
     const balanceTON = Number(account.balance) / 1e9
-    const tonPrice = await getCoinPrice('the-open-network')
+    const tonPrice = await getCachedSpotPrice('the-open-network')
     const tonUsd = Math.round(balanceTON * tonPrice * 100) / 100
 
     const tokens: PortfolioToken[] = [{
@@ -173,15 +182,4 @@ async function fetchTON(address: string): Promise<PortfolioResponse> {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────
-
-async function getCoinPrice(coinId: string): Promise<number> {
-  try {
-    const data = await $fetch<any>(
-      `https://api.coingecko.com/api/v3/simple/price`,
-      { query: { ids: coinId, vs_currencies: 'usd' } }
-    )
-    return data[coinId]?.usd ?? 0
-  } catch {
-    return 0
-  }
-}
+// getCachedSpotPrice is auto-imported from server/utils/spot-price.ts

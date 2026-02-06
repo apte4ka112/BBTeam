@@ -1,3 +1,5 @@
+import { coinIdCache } from './market-cache'
+
 const SYMBOL_TO_COINGECKO: Record<string, string> = {
   ETH: 'ethereum',
   WETH: 'weth',
@@ -51,10 +53,7 @@ const SYMBOL_TO_COINGECKO: Record<string, string> = {
   CBETH: 'coinbase-wrapped-staked-eth',
 }
 
-// In-memory cache for CoinGecko search results
-const searchCache = new Map<string, string | null>()
-
-async function resolveCoinId(symbol: string): Promise<string | null> {
+export async function resolveCoinId(symbol: string): Promise<string | null> {
   const upper = symbol.toUpperCase()
 
   // Check static mapping first
@@ -62,9 +61,9 @@ async function resolveCoinId(symbol: string): Promise<string | null> {
     return SYMBOL_TO_COINGECKO[upper]
   }
 
-  // Check search cache
-  if (searchCache.has(upper)) {
-    return searchCache.get(upper) ?? null
+  // Check permanent cache
+  if (coinIdCache.has(upper)) {
+    return coinIdCache.get(upper) ?? null
   }
 
   // CoinGecko Search API fallback
@@ -79,43 +78,10 @@ async function resolveCoinId(symbol: string): Promise<string | null> {
     )
 
     const id = match?.id ?? null
-    searchCache.set(upper, id)
+    coinIdCache.set(upper, id)
     return id
   } catch {
-    searchCache.set(upper, null)
+    coinIdCache.set(upper, null)
     return null
   }
 }
-
-export default defineEventHandler(async (event) => {
-  const body = await readBody<{ symbol: string; days?: number }>(event)
-
-  if (!body?.symbol) {
-    throw createError({ statusCode: 400, statusMessage: 'Missing symbol' })
-  }
-
-  const coinId = await resolveCoinId(body.symbol)
-  if (!coinId) {
-    throw createError({ statusCode: 400, statusMessage: `Unknown token: ${body.symbol}` })
-  }
-
-  const days = body.days || 7
-
-  try {
-    const data = await $fetch<{ prices: [number, number][] }>(
-      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart`,
-      { query: { vs_currency: 'usd', days } }
-    )
-
-    return {
-      symbol: body.symbol.toUpperCase(),
-      days,
-      prices: data.prices.map(([time, price]) => ({
-        time,
-        price: Math.round(price * 100) / 100,
-      })),
-    }
-  } catch {
-    throw createError({ statusCode: 502, statusMessage: 'Failed to fetch chart data' })
-  }
-})

@@ -159,7 +159,12 @@ const handleManualConnect = async () => {
   }
 
   if (selectedType.value === 'BTC' && !/^(1|3|bc1)[a-zA-HJ-NP-Z0-9]{25,62}$/.test(addr)) {
-    errorMsg.value = 'Некорректный Bitcoin-адрес'
+    errorMsg.value = 'Некорректный Bitcoin-адрес. Ожидается: 1..., 3... или bc1...'
+    return
+  }
+
+  if (selectedType.value === 'TON' && !/^(UQ|EQ|0:[a-zA-Z0-9\/+_=-]+|[a-zA-Z0-9\/+_]{48})$/.test(addr)) {
+    errorMsg.value = 'Некорректный TON-адрес. Ожидается: UQ:..., EQ:..., 0:... или base64'
     return
   }
 
@@ -169,8 +174,8 @@ const handleManualConnect = async () => {
     await fetchPortfolio()
     showModal.value = false
     navigateTo('/portfolio')
-  } catch {
-    errorMsg.value = 'Не удалось загрузить портфель. Проверьте адрес.'
+  } catch (err: any) {
+    errorMsg.value = err?.data?.statusMessage || 'Не удалось загрузить портфель. Проверьте адрес.'
     disconnectWallet()
   } finally {
     loading.value = false

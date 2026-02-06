@@ -57,6 +57,10 @@
   animation-delay: 1s;
 }
 
+html, body {
+  background-color: #020617;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

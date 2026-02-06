@@ -71,6 +71,7 @@ interface NewsItem {
   image: string
   timestamp: number
   excerpt: string
+  categories?: string[]
 }
 
 const news = ref<NewsItem[]>([])
@@ -93,7 +94,9 @@ const fetchNews = async () => {
   loading.value = true
   errorMsg.value = ''
   try {
-    const data = await $fetch<{ news: NewsItem[] }>('/api/news')
+    const data = await $fetch<{ news: NewsItem[] }>('/api/news', {
+      query: { limit: 10 },
+    })
     news.value = data.news
   } catch {
     errorMsg.value = 'Не удалось загрузить новости'
