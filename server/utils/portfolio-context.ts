@@ -269,6 +269,5 @@ export async function buildPortfolioContext(params: PortfolioContextParams): Pro
   lines.push(`Доля стейблкоинов: ${stablePct.toFixed(0)}% — ${getStablecoinAssessment(stablePct)}`)
 
   const result = lines.join('\n')
-  console.log('[PortfolioContext] Built context:', result.length, 'chars')
   return result
 }

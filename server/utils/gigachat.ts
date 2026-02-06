@@ -17,7 +17,6 @@ let tokenExpiresAt: number = 0
  * from GigaChat Studio (called Authorization Key)
  */
 function getBasicAuth(clientId: string, authKey: string): string {
-  console.log('[GigaChat] getBasicAuth - authKey:', authKey?.substring(0, 30) + '...')
   // authKey is already the base64 encoded Authorization Key from studio
   return `Basic ${authKey}`
 }
@@ -27,15 +26,10 @@ function getBasicAuth(clientId: string, authKey: string): string {
  * Tokens are cached and refreshed automatically (30min expiry)
  */
 export async function getGigaChatToken(): Promise<string> {
-  console.log('[GigaChat] ===== Starting token request =====')
   const config = useRuntimeConfig()
 
   const clientId = config.gigaChatClientId
   const authKey = config.gigaChatClientSecret
-
-  console.log('[GigaChat] Config check:')
-  console.log('[GigaChat]   clientId exists:', !!clientId, clientId?.substring(0, 20) + '...')
-  console.log('[GigaChat]   authKey exists:', !!authKey, authKey?.substring(0, 30) + '...')
 
   if (!clientId || !authKey) {
     console.error('[GigaChat] ERROR: Missing credentials!')
@@ -44,17 +38,11 @@ export async function getGigaChatToken(): Promise<string> {
 
   // Return cached token if still valid
   if (cachedToken && Date.now() < tokenExpiresAt) {
-    console.log('[GigaChat] Using cached token')
     return cachedToken
   }
 
   const rqUid = crypto.randomUUID()
   const authHeader = getBasicAuth(clientId, authKey)
-
-  console.log('[GigaChat] OAuth request:')
-  console.log('[GigaChat]   URL: https://ngw.devices.sberbank.ru:9443/api/v2/oauth')
-  console.log('[GigaChat]   RqUID:', rqUid)
-  console.log('[GigaChat]   Auth header:', authHeader.substring(0, 40) + '...')
 
   try {
     const response = await $fetch<GigaChatTokenResponse>(
@@ -73,21 +61,12 @@ export async function getGigaChatToken(): Promise<string> {
       }
     )
 
-    console.log('[GigaChat] Token received! access_token exists:', !!response.access_token)
-    console.log('[GigaChat] expires_at:', response.expires_at, new Date(response.expires_at * 1000).toISOString())
-
     cachedToken = response.access_token
     // Use API's expiry time with 1 minute buffer
     tokenExpiresAt = (response.expires_at * 1000) - 60000
 
-    console.log('[GigaChat] Token cached successfully')
     return cachedToken
   } catch (err: any) {
-    console.error('[GigaChat] ===== TOKEN REQUEST FAILED =====')
-    console.error('[GigaChat] Error name:', err?.name)
-    console.error('[GigaChat] Error message:', err?.message)
-    console.error('[GigaChat] Status:', err?.statusCode || err?.status || 'N/A')
-    console.error('[GigaChat] Response data:', JSON.stringify(err?.data || err?.response?._data, null, 2))
     throw new Error(`Failed to get GigaChat token: ${err?.message || 'Unknown error'}`)
   }
 }
@@ -122,13 +101,7 @@ export async function gigaChatCompletion(
   messages: GigaChatMessage[],
   model: string = 'GigaChat-2'
 ): Promise<string> {
-  console.log('[GigaChat] ===== Starting chat completion =====')
-  console.log('[GigaChat] Model:', model)
-  console.log('[GigaChat] Messages count:', messages.length)
-
   const token = await getGigaChatToken()
-
-  console.log('[GigaChat] Got token, length:', token?.length)
 
   try {
     const requestBody = {
@@ -136,9 +109,6 @@ export async function gigaChatCompletion(
       messages,
       stream: false,
     }
-
-    console.log('[GigaChat] Sending request to:', 'https://gigachat.devices.sberbank.ru/api/v1/chat/completions')
-    console.log('[GigaChat] Request body (first msg):', messages[0]?.content?.substring(0, 50) + '...')
 
     const response = await $fetch<GigaChatResponse>(
       'https://gigachat.devices.sberbank.ru/api/v1/chat/completions',
@@ -152,17 +122,8 @@ export async function gigaChatCompletion(
       }
     )
 
-    console.log('[GigaChat] Response received!')
-    console.log('[GigaChat] Choices count:', response.choices?.length)
-    console.log('[GigaChat] Content preview:', response.choices?.[0]?.message?.content?.substring(0, 100) + '...')
-
     return response.choices?.[0]?.message?.content || 'Нет ответа от модели'
   } catch (err: any) {
-    console.error('[GigaChat] ===== COMPLETION FAILED =====')
-    console.error('[GigaChat] Error name:', err?.name)
-    console.error('[GigaChat] Error message:', err?.message)
-    console.error('[GigaChat] Status:', err?.statusCode || err?.status || 'N/A')
-    console.error('[GigaChat] Response data:', JSON.stringify(err?.data || err?.response?._data, null, 2))
     throw err
   }
 }

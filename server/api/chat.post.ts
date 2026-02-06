@@ -162,8 +162,6 @@ ${portfolioContext}
     ...body.messages,
   ]
 
-  console.log('[GigaChat] Processing chat request with', messages.length, 'messages')
-
   try {
     const model = config.gigaChatModel || 'GigaChat-2'
     const content = await gigaChatCompletion(messages, model)
@@ -171,7 +169,6 @@ ${portfolioContext}
     return { message: content }
   } catch (err: any) {
     const detail = err?.message || err?.toString?.() || 'Unknown error'
-    console.error('[GigaChat] Error:', detail)
     throw createError({
       statusCode: 502,
       statusMessage: `GigaChat error: ${detail}`,

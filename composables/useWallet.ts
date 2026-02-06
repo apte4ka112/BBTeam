@@ -89,7 +89,7 @@ export const useWallet = () => {
       portfolioTokens.value = data.tokens
       totalUsdValue.value = data.total_usd_value
     } catch (err) {
-      console.error('Portfolio fetch failed:', err)
+      // Silently handle portfolio fetch errors
     } finally {
       portfolioLoading.value = false
     }

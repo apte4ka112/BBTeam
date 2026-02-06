@@ -6,9 +6,9 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss'],
 
   ssr: true,
-  debug: true,
+  debug: false,
   features: {
-    devLogs: true
+    devLogs: false
   },
   runtimeConfig: {
     moralisApiKey: process.env.NUXT_MORALIS_API_KEY || '',
@@ -32,6 +32,10 @@ export default defineNuxtConfig({
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        {
+          'http-equiv': 'Content-Security-Policy',
+          content: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://mc.yandex.ru; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://api.coingecko.com https://gigachat.devices.sberbank.ru https://ngw.devices.sberbank.ru https://deep-index.moralis.io; frame-src 'self' https://oauth.telegram.org;"
+        },
         {
           name: 'description',
           content: 'Управляйте криптопортфелем с AI-аналитикой от GigaChat. Поддержка Ethereum, Bitcoin, TON. Графики, транзакции, новости и умные рекомендации.'
@@ -88,6 +92,17 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       failOnError: false,
+    },
+    // Security headers for API routes
+    routeRules: {
+      '/api/**': {
+        headers: {
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'X-XSS-Protection': '1; mode=block',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+        },
+      },
     },
   },
 })
