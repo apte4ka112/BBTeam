@@ -6,26 +6,19 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss'],
 
   ssr: true,
-
+  debug: true,
+  features: {
+    devLogs: true
+  },
   runtimeConfig: {
-    // Private keys (only available server-side)
-    telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || '',
-    jwtSecret: process.env.JWT_SECRET || 'change-me-in-production',
-
-    // Public keys (exposed to client)
-    public: {
-      telegramBotUsername: process.env.TELEGRAM_BOT_USERNAME || '',
-    }
+    moralisApiKey: '',
+    gigaChatClientId: process.env.GIGACHAT_CLIENT_ID || '',
+    gigaChatClientSecret: process.env.GIGACHAT_CLIENT_SECRET || '',
+    gigaChatModel: process.env.GIGACHAT_MODEL || 'GigaChat-2',
   },
 
   typescript: {
     strict: true,
     typeCheck: false
   },
-
-  vite: {
-    optimizeDeps: {
-      include: ['crypto-js']
-    }
-  }
 })

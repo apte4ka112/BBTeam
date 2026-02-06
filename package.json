@@ -1,7 +1,7 @@
 {
-  "name": "bbteam-telegram-auth",
+  "name": "bbteam-web3-wallet",
   "version": "1.0.0",
-  "description": "Nuxt 3 Telegram Login Widget Auth",
+  "description": "Nuxt 3 Web3 Wallet Connect",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,10 +12,12 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@vueuse/nuxt": "^12.0.0",
-    "crypto-js": "^4.2.0",
+    "@moralisweb3/common-evm-utils": "^2.27.2",
+    "chart.js": "^4.5.1",
+    "moralis": "^2.27.2",
     "nuxt": "^3.15.0",
-    "vue": "^3.5.0"
+    "vue": "^3.5.0",
+    "vue-chartjs": "^5.3.3"
   },
   "devDependencies": {
     "@nuxt/types": "^2.18.1",
